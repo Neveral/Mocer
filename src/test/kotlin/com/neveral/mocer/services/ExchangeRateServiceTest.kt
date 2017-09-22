@@ -8,8 +8,6 @@ import org.junit.Test
 /**
  * Created by Neveral on 20/09/2017.
  */
-//@RunWith(SpringRunner::class)
-//@SpringBootTest
 class ExchangeRateServiceTest {
 
     lateinit var exchangeRateService: ExchangeRateService
