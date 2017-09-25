@@ -1,5 +1,7 @@
 package com.neveral.mocer.services
 
+import com.neveral.mocer.Currencies
+import com.neveral.mocer.CurrencyDto
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -15,31 +17,34 @@ import java.io.OutputStreamWriter
 class DefaultExchangeRateService : ExchangeRateService {
 
     val DEFAULT_URL_TO_PARSE_EXCHANGE_RATE = "https://bitinfocharts.com/ru/markets/"
+    val currencyRateMap: HashMap<String, Double> = HashMap()
 
-    override fun getExchangeRate(): Map<String, Double> {
+    /**
+     * This method return map of cryptocoins currency exchange rate from parsed site https://bitinfocharts.com/ru/markets/
+     */
+    override fun getExchangeRateForAllCoins(): Map<String, Double> {
         val doc: Document = Jsoup.connect(DEFAULT_URL_TO_PARSE_EXCHANGE_RATE)
                 .userAgent("Mozilla")
                 .get()
 
         val elementsByClass = doc.getElementsByClass("ptr")
 
-//        File("page.html").printWriter().use {
-//            it.print(elementsByClass.get(0).t)
-//        }
-
-        val currencyRateMap: HashMap<String, Double> = HashMap()
 
         for (element: Element in elementsByClass) {
-            val currencyName = element.child(0).child(0).text()
-            val currencyRate: Double =parseDoubleFromConvCurElement(element.getElementsByClass("conv_cur")[0])
-            println("$currencyName: $currencyRate")
+            val currencyName = element.child(0).text().substringBefore(" ")
+            val currencyRate: Double = parseDoubleFromConvCurElement(element.getElementsByClass("conv_cur")[0])
             currencyRateMap.put(currencyName, currencyRate)
         }
 
+        return currencyRateMap
+    }
 
-        print(currencyRateMap)
+    override fun getExchangeRateFor(currency: Currencies): CurrencyDto {
+        if (currencyRateMap.isEmpty())
+            getExchangeRateForAllCoins()
 
-        return HashMap()
+        return CurrencyDto(currency.name,
+                currencyRateMap[currency.shortName] ?: throw RuntimeException("Currency rate for this coin was not found"))
     }
 
     fun parseDoubleFromConvCurElement(element: Element): Double {

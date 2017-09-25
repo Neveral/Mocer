@@ -1,5 +1,7 @@
 package com.neveral.mocer.controllers
 
+import com.neveral.mocer.services.ExchangeRateService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -12,13 +14,14 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 class ExchangeRateController {
 
+    @Autowired
+    lateinit var exchangeRateService: ExchangeRateService
+
     @RequestMapping("/getExchange")
     @ResponseBody
-    fun getExchangeRate(): ResponseEntity<RandomNumber> {
-        val a = Math.random()*10
+    fun getExchangeRate(): ResponseEntity<Map<String, Double>> {
 
-        return ResponseEntity.ok(RandomNumber(a))
+        return ResponseEntity.ok(exchangeRateService.getExchangeRateForAllCoins())
     }
 
-    data class RandomNumber(var number: Double)
 }
